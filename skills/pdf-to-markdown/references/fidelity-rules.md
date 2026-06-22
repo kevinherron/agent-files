@@ -97,6 +97,8 @@ Sequence diagrams, state machines, and timing diagrams can't be drawn in Markdow
 
 The goal: a reader can reconstruct the protocol exchange without the picture.
 
+**Text first, image optional.** Always produce the text transcription — it is what a text-only agent loads and what survives as machine-readable ground truth. If the optional figure phase runs (`scripts/extract_figures.py` + `scripts/inject_figures.py`), it *adds* a cropped `![caption](figures/figure-NN.png)` of the original diagram beneath the transcription; it never replaces it. Convert agents do not embed images themselves — keep the figure heading (`## Figure N - caption`) intact so the injector can place the image, and never delete a text transcription on the assumption an image will cover it (a figure may be pruned for a bad crop).
+
 ## Selection / interoperability checklists → tables with the boxes intact
 
 Render selection sheets as GFM tables whose cells keep the literal Markdown checkbox `[ ]` (and `[X]` where ticked), preceded by an italic note on the marking convention. In a large selection matrix, defined-but-blank cells are `[ ]`, not-applicable cells use a shading glyph (`▒`), footnote markers use superscripts (`ᵃ`), and angle-bracket type ids in headers are backslash-escaped for GFM (`\<123\>`).
