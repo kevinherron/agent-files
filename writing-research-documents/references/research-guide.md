@@ -2,7 +2,7 @@
 
 Research documents capture what was learned during investigation of a problem,
 technology, or area of the codebase.
-They are the foundation for design proposals and implementation plans.
+They are the foundation for technical design documents and implementation plans.
 
 * * *
 
@@ -18,9 +18,10 @@ doesn’t have to redo the investigation.
 
 ## What a research doc is NOT
 
-- **Not a design proposal.** Research may include design options and recommendations,
+- **Not a design document.** Research may include design options and recommendations,
   but the purpose is to inform decisions, not to make them.
-  Decisions belong in a design proposal.
+  Decisions belong in a technical design document (see the
+  `writing-technical-design-documents` skill).
 - **Not an architecture doc.** Research describes what was found at a point in time.
   Architecture docs describe the system as-built and are kept current.
 - **Not a tutorial.** The audience is someone who needs to make technical decisions, not
@@ -73,7 +74,7 @@ specification, survey the existing codebase, and sketch possible designs.
 2. Specification analysis (wire formats, sequences, requirements)
 3. Current codebase architecture (what exists, how it works)
 4. Design options (candidate approaches, sketches, trade-offs — informing the future
-   design proposal, not making its decisions)
+   design document, not making its decisions)
 5. Risks and open questions
 Appendix: comparisons, reference tables
 ```
