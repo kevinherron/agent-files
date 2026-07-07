@@ -185,7 +185,7 @@ this approach wins. Cite constraints by name (C1, C2, …) rather than restating
 
 These decisions are *proposals* — they may change during implementation.
 When they do, update this section or note the deviation in the implementation plan's
-Implementation Notes (see the writing-implementation-plans skill).
+Implementation Notes (see the writing-implementation-plan-documents skill).
 -->
 
 ### [Decision title]
