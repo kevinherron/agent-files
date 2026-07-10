@@ -26,11 +26,20 @@ Only state behavior verified in code or in a referenced document.
 [Why this work matters.
 Business reason, spec compliance, user need, etc.]
 
+### Goals and Success Criteria
+
+<!-- State the outcomes the design must achieve and how reviewers will know they have
+been achieved. Label each goal (G1, G2, …) so Key Decisions can cite it by name.
+Prefer observable outcomes over implementation tasks.
+-->
+
+- **G1** — [Desired outcome and how reviewers will know it has been achieved.]
+
 ## Constraints
 
 <!-- External forces that bound the solution space.
-Label each constraint (C1, C2, …) so Key Decisions can cite it by name instead of
-restating it.
+Label each constraint (C1, C2, …) so Key Decisions can cite it alongside goals instead
+of restating it.
 Remove this section if there are no constraints worth calling out.
 
 Examples: spec requirements, backwards compatibility, performance budgets, security
@@ -146,7 +155,8 @@ Remove this subsection only if the design has no runtime surface.
 untrusted input, secrets or sensitive data.
 
 Do not remove this subsection: if there is no new attack surface, say so and why in a
-sentence. For designs that warrant a full analysis, use the threat-modeling skill.
+sentence. For designs that warrant a full analysis, use an available threat-modeling
+skill if present.
 -->
 
 [Security impact of the design, or why there is none.]
@@ -181,7 +191,8 @@ forward.
 
 <!-- The structural choices that constrain the implementation.
 Each entry names the approach chosen, the alternatives genuinely considered, and why
-this approach wins. Cite constraints by name (C1, C2, …) rather than restating them.
+this approach wins. Cite goals and constraints by name (G1, C1, …) rather than
+restating them.
 
 These decisions are *proposals* — they may change during implementation.
 When they do, update this section or note the deviation in the implementation plan's
@@ -200,7 +211,7 @@ Implementation Notes (see the writing-implementation-plan-documents skill).
   win.]
 
 **Rationale:**
-[Why the chosen approach is the best fit, citing the constraints and goals stated
+[Why the chosen approach is the best fit, citing the named goals and constraints stated
 elsewhere in this document — never a restatement of the decision. Include relative
 cost/effort and dependency burden where they drove the choice.]
 
@@ -212,20 +223,26 @@ Most design documents have 2–5 decisions; small features may have one, large d
 Never invent a decision to hit a count.
 -->
 
-## Risks and Open Questions
+## Assumptions, Risks, and Open Questions
 
 <!-- Things that could change the approach once implementation begins.
 
+- **Assumption**: a provisional fact the design relies on without complete verification.
+  State its basis and what changes if it is false.
 - **Risk**: a known unknown — something that *might* happen and would force a change in
   approach.
-- **Question**: something that needs an answer before or during implementation —
-  including assumptions you made without user review.
+- **Question**: something that needs an answer before or during implementation.
 
 List every unknown that could invalidate a Key Decision.
 If there are truly none, write "None identified" — never invent items to look complete.
 As items resolve, mark them Resolved (with the answer, or a pointer to the Key Decision
 that absorbed it) rather than deleting them, so review history survives.
 -->
+
+**A1 (Assumption)** — [Provisional fact used by the design.]
+**Basis:** [Available evidence or inference.]
+**Impact if false:** [What decision or approach would change.]
+**Status:** Unconfirmed
 
 **R1 (Risk)** — [What might happen.]
 **Impact:** [What changes in the approach if it does.]
