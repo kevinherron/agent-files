@@ -1,73 +1,82 @@
 # Example Plan Excerpt
 
-This is a filled-in excerpt from a realistic plan — one phase, one Rejected Splits
-entry, and the Verification Summary — showing the target level of detail: decisions and
-shape, not implementations. It is calibration material for the author; don't copy its
-content into new plans.
+This is a calibration excerpt from a `Ready` plan. It shows one capability-based work
+package, one rejected split, and the shared Verification Summary. Use its level of
+specificity, not its content.
 
 * * *
 
-## Phase 2: Rate Limit Enforcement in the Request Pipeline
+## Work Package 2: Rate Limit Enforcement in the Request Pipeline
 
-Wires the `RateLimiter` built in Phase 1 into the HTTP request pipeline and rejects
-over-limit requests. Comes after Phase 1 because it consumes the limiter's public API;
-comes before the admin UI (Phase 3) so enforcement can soak behind the existing
-`rate-limits.enabled` config flag while the UI is built.
+Wire the `RateLimiter` delivered by `WP1` into the HTTP request pipeline and reject
+over-limit requests. Enforcement precedes the admin UI because it can operate behind
+the existing `rate-limits.enabled` flag while later management surfaces are built.
 
-**Depends on:** Phase 1 (`RateLimiter`, `RateLimitConfig`).
-
+**ID:** `WP2`
+**Depends on:** `WP1` (`RateLimiter`, `RateLimitConfig`)
 **Done when:** Requests over the configured per-key limit receive `429 Too Many
-Requests` with a `Retry-After` header; under-limit requests are unaffected; setting
-`rate-limits.enabled=false` restores pre-plan behavior exactly.
+Requests` with `Retry-After`; under-limit requests are unchanged; disabling
+`rate-limits.enabled` restores the pre-plan request path.
+**Checkpoint:** None
 
 ### 2.1 Enforcement filter
 
 **New file:** `gateway-api/src/main/java/org/example/gateway/api/RateLimitFilter.java`
 
-A servlet filter that resolves the API key from the request, consults the limiter, and
-either passes the request through or short-circuits with 429. Registered alongside the
-existing auth filter — mirror `ApiAuthFilter`'s registration and ordering.
+Add a servlet filter that resolves the authenticated API key, consults the limiter, and
+either continues the chain or returns `429`. Mirror `ApiAuthFilter` for construction and
+registration rather than introducing another filter lifecycle.
 
 ```java
-public class RateLimitFilter implements Filter {
-    private final RateLimiter limiter;          // from Phase 1
-    private final ApiKeyResolver keyResolver;   // existing component
+public final class RateLimitFilter implements Filter {
+    private final RateLimiter limiter;
+    private final ApiKeyResolver keyResolver;
 
     @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-        // resolve key -> limiter.tryAcquire(key) -> 429 + Retry-After, or chain
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain);
 }
 ```
 
 **Notes:**
-- Requests with no resolvable API key bypass the limiter (they are rejected by
-  `ApiAuthFilter` later in the chain; see Gaps for the anonymous-endpoint case).
-- `Retry-After` is seconds until the current window resets, from
-  `RateLimiter.retryAfter(key)`.
 
-### 2.2 Filter registration and config gate
+- Requests without an authenticated key pass to the existing authorization failure
+  path and do not consume a guessed or caller-supplied key's budget.
+- `Retry-After` is the number of seconds until the current window resets, obtained from
+  `RateLimiter.retryAfter(key)`.
+- Limiter failures use the design's fail-closed policy and emit the existing request
+  rejection metric without logging API keys.
+
+### 2.2 Filter registration and configuration gate
 
 **File:** `gateway-api/src/main/java/org/example/gateway/api/GatewayApiModule.java`
 
-Register `RateLimitFilter` after `ApiAuthFilter` in the filter chain, gated on
-`rate-limits.enabled`. Follows the existing conditional-registration pattern used for
-`AuditLogFilter`.
+Register `RateLimitFilter` after `ApiAuthFilter`, gated by `rate-limits.enabled`. Follow
+the conditional-registration pattern used by `AuditLogFilter`.
 
 ### Design Decisions
 
-**Filter order — after auth, not before:** Limiting before auth would let unauthenticated
-traffic consume a key's budget via spoofed headers. Costs us limiter protection for the
-auth path itself, which is acceptable: auth failures are already cheap and cached.
+- **Filter after authentication.** Running before authentication would let callers
+  consume another key's budget through spoofed headers. Authentication failures remain
+  outside this limiter because that path is already cheap and separately protected.
+
+### Failure, Safety, and Security
+
+- Do not derive limiter identity from an unauthenticated header.
+- Do not include raw API keys in logs, metrics, or error bodies.
+- Preserve the configured fail-closed policy when the limiter backend is unavailable.
 
 ### Tests
 
-**File:** `gateway-api/src/test/java/org/example/gateway/api/RateLimitFilterTest.java`
+**New file:** `gateway-api/src/test/java/org/example/gateway/api/RateLimitFilterTest.java`
 
 Tests:
-- Under-limit request passes through unchanged (chain invoked, no extra headers).
-- Over-limit request gets 429, `Retry-After` set, chain not invoked.
-- Disabled flag: filter not registered; behavior identical to pre-plan baseline.
-- Missing API key: request passes to the chain untouched.
+
+- An under-limit authenticated request invokes the chain without extra headers.
+- An over-limit request returns 429 with `Retry-After` and does not invoke the chain.
+- Disabling the flag leaves the filter unregistered and preserves baseline behavior.
+- A request without an authenticated key passes to the existing authorization path.
+- A scripted two-key burst limits one key without affecting the other.
+- A limiter backend failure follows fail-closed policy without exposing the key.
 
 ### Verification
 
@@ -75,21 +84,17 @@ Tests:
 
 - [ ] Standard gate for `gateway-api` — commands in
   [Verification Summary](#verification-summary)
+- [ ] Run `RateLimitFilterTest` with the deterministic clock and limiter fixture.
 
-#### Manual
+#### Agent review
 
-These checks require a human. An agent implementing this phase must stop and request
-verification rather than checking these boxes.
-
-- [ ] With a 5 req/min limit configured, a scripted burst from one key returns 429 on
-  request 6; a second key is unaffected.
+- [ ] Confirm filter order is authentication, rate limiting, then request dispatch.
+- [ ] Confirm no log or metric records the raw key.
 
 ### Implementation Notes
 
-Filled in during implementation, not during planning. Record dated entries for
-deviations from the plan, surprises, and newly discovered work. If an entry invalidates
-a later phase or the File Inventory, update those sections too — the Notes are the
-changelog; the plan body is the current truth.
+Filled in during implementation. Record dated deviations and update downstream work
+packages, readiness, and the File Inventory when a note changes their assumptions.
 
 *None yet.*
 
@@ -97,30 +102,30 @@ changelog; the plan body is the current truth.
 
 ## Rejected Splits
 
-- **Split Phase 2 into 2a (filter class) and 2b (registration).** 2a would ship a
-  filter no request path executes — dead code with tests asserting behavior nothing
-  exercises. Registration is two lines; it belongs with the filter it registers.
+- **Separate filter construction from registration.** The first work package would
+  introduce dead code that no request executes, while registration is a small part of
+  the same independently verifiable capability.
 
 * * *
 
 ## Verification Summary
 
-Standard per-phase gate:
+### Standard affected-scope gate
 
 ```bash
-mvn -q spotless:apply
-mvn -q -pl gateway-api clean compile
 mvn -q -pl gateway-api test -Dtest=RateLimitFilterTest
+mvn -q -pl gateway-api spotless:check
+mvn -q -pl gateway-api package -DskipTests
 ```
 
-The final phase additionally runs a full build:
+### Final plan gate
 
 ```bash
 mvn -q clean verify
 ```
 
-| Phase | Build scope | Test target |
+| Work package | Scope | Required evidence |
 | --- | --- | --- |
-| 1 | `gateway-core` | `RateLimiterTest` |
-| 2 | `gateway-api` | `RateLimitFilterTest` |
-| Final | full build | all tests (`mvn -q clean verify`) |
+| `WP1` | `gateway-core` | `RateLimiterTest` and module build |
+| `WP2` | `gateway-api` | `RateLimitFilterTest`, formatting check, package build |
+| Final | full build | `mvn -q clean verify` |

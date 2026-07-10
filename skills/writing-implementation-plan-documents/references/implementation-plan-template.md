@@ -1,375 +1,344 @@
 # [Feature Name]: Implementation Plan
 
-[One- or two-sentence summary of what this plan implements.]
+[One- or two-sentence statement of the observable outcome this plan delivers.]
 
-<!-- State the plan's source.
-Replace the "Based on [source]." line below with whichever of these applies:
-- Based on the design in `docs/design/[feature-slug].md`.
-- Based on research in `docs/research/[research-doc].md`.
-- Based on [specification name, section reference].
-- Based on [issue tracker link].
-- Based on requirements discussed with [user] in conversation ([date]).
+<!-- Cite authoritative sources by path, URL, issue, specification section, or dated
+conversation. Link stable design sections instead of restating them. -->
+
+Based on [authoritative source].
+
+**Plan ID:** `[feature-slug]`
+**Status:** [Ready | Conditional | Draft]
+**Parent manifest:** [path or None]
+**Grounded against:** [branch, commit, handoff, artifact version, or inspection date]
+**Re-ground before:** [WPx and trigger, or None]
+
+<!--
+Ready: implementation can begin; no blocking decision remains and file-level grounding
+is complete.
+Conditional: implementation depends on a named handoff or code state; affected work
+packages must be re-grounded before they start.
+Draft: a material decision remains unresolved; do not use for unattended execution.
+
+For a one-work-package plan touching only a handful of files, omit the TOC, Progress,
+Implementation Map, Rejected Splits, and File Inventory when they add no navigation or
+recovery value. Keep metadata, Scope, Current State, Desired End State, the work
+package, verification, and any material open decision.
 -->
-
-Based on [source].
 
 * * *
 
 ## Table of Contents
 
-<!-- After filling in the phase titles, regenerate every anchor from the final heading
-text (GitHub slug rules: lowercase, punctuation stripped, spaces become hyphens —
-"Phase 1: Data Model" becomes #phase-1-data-model).
-Remove the entry for any section you omit.
-One "Phase N" entry per phase.
--->
+<!-- Regenerate anchors after finalizing headings. Remove entries for omitted sections. -->
 
 - [Progress](#progress)
 - [Scope](#scope)
 - [Current State](#current-state)
 - [Desired End State](#desired-end-state)
 - [Assumptions and Gaps](#assumptions-and-gaps)
+- [Open Decisions](#open-decisions)
 - [Prerequisites](#prerequisites)
-- [Architecture Overview](#architecture-overview)
-- [Phase 1: [Title]](#phase-1-title)
-- [Phase 2: [Title]](#phase-2-title)
+- [Implementation Map](#implementation-map)
+- [WP1 — Title](#work-package-1-title)
+- [WP2 — Title](#work-package-2-title)
 - [Rejected Splits](#rejected-splits)
 - [File Inventory](#file-inventory)
 - [Verification Summary](#verification-summary)
+- [Downstream Handoff](#downstream-handoff)
 
 ## Progress
 
-<!-- Place this immediately after the TOC for visibility.
-One checkbox per phase — intra-phase state is tracked by each phase's Verification
-checklist, not duplicated here.
-This section is authoritative when resuming work: update it at every phase and
-sub-task completion.
-Link each phase to its heading, using the same regenerated anchors as the TOC.
--->
+<!-- One checkbox per work package. Do not duplicate subtask or verification state here. -->
 
-- [ ] [Phase 1: [Title]](#phase-1-title)
-- [ ] [Phase 2: [Title]](#phase-2-title)
+- [ ] [WP1 — Title](#work-package-1-title)
+- [ ] [WP2 — Title](#work-package-2-title)
 
 * * *
 
 ## Scope
 
-<!-- Dedicated section so it's scannable.
-State what this plan covers and what it explicitly does not.
-If a design doc exists, this section must agree with its Scope section; note any
-deliberate divergence explicitly.
--->
+<!-- Keep this aligned with the accepted design. State deliberate divergences. -->
 
 This plan covers:
 
-1. …
-2. …
+1. [Capability or migration outcome.]
+2. [Capability or migration outcome.]
 
 **Out of scope:**
-[Anything deliberately excluded — including deployment, rollout, or migration
-execution if this plan stops at merge — and where it is covered, if applicable.]
+
+- [Excluded behavior and where it is owned, if applicable.]
 
 * * *
 
 ## Current State
 
-<!-- Briefly describe the relevant parts of the system as they exist today.
-This establishes the baseline so the reader understands what's changing and why.
-Include key file paths or components involved.
-Keep it factual — save opinions for design decisions.
--->
+<!-- Describe only the relevant baseline. Name exact existing files, APIs, schemas,
+tests, or runtime seams. Link research for detailed history. -->
 
-[What exists now, what's missing, key constraints discovered during research.]
+[What exists, what is missing, and the constraints that shape this implementation.]
 
 * * *
 
 ## Desired End State
 
-<!-- Describe what the system should look like when this plan is fully implemented.
-This is the acceptance target — an implementer should be able to read this section and
-know when they're done.
-Include observable behaviors, not just internal structure.
-Each phase also carries its own "Done when" line at phase granularity.
--->
+<!-- State observable behavior and the evidence that proves the entire plan complete. -->
 
-[Description of the target state after all phases are complete, and how to verify it
-was reached.]
+[What users, callers, operators, or tests can observe when the plan is complete.]
 
 * * *
 
 ## Assumptions and Gaps
 
-<!-- Assumptions: things the design treats as given but doesn't state explicitly.
-Gaps: line-level choices inside an already-scoped sub-task that the implementer will
-make as they go.
-
-Anything bigger than that — anything whose answer changes phase structure, the File
-Inventory, or user-visible behavior — is an open question and must be resolved before
-the plan is finalized (see SKILL.md's Workflow).
-A decision deferred to a named checkpoint ("revisit after Phase 1's spike") may be
-recorded here; an undated "TBD" may not.
-
-Omit this section if the source material is fully explicit and there are no notable
-unknowns.
+<!--
+Assumptions are bounded facts treated as given and where they can be confirmed.
+Gaps are line-level choices that do not change public behavior, security, plan shape,
+file ownership, or compatibility.
+Omit when there are none.
 -->
 
 **Assumptions:**
 
-- [Something the design depends on but doesn't state.
-  Note where the implementer can confirm it.]
+- [Assumption and confirmation source.]
 
 **Gaps:**
 
-- [A line-level call the implementer will make — a corner case, error path,
-  observability question. Note who decides if it isn't the implementer.]
+- [Bounded implementer choice and its allowed decision criteria.]
+
+* * *
+
+## Open Decisions
+
+<!--
+Required for Conditional or Draft plans when a material decision remains. Omit for a
+Ready plan. Every decision needs an owner/source, trigger, affected work, and explicit
+behavior if unresolved. Do not use anonymous or undated TBDs.
+-->
+
+| Decision | Owner or source | Resolve before | Affected work | If unresolved |
+| --- | --- | --- | --- | --- |
+| [Material decision] | [Person, design, specification, or code evidence] | [Trigger] | [WPx] | [Block, narrow scope, or safe fallback] |
 
 * * *
 
 ## Prerequisites
 
-<!-- Call out dependencies on other plans, prior work, or shared components that must
-exist before this plan can start.
-If a prerequisite might already be satisfied, say so ("if X already exists, Phase 1 can
-be skipped").
+<!-- List external plans, migrations, capabilities, tools, or permissions that must
+exist. Omit if there are none. -->
 
-Omit this section if there are no external prerequisites.
--->
-
-- [Dependency description]. If already implemented, Phase 1 can be skipped.
+- [Prerequisite and how to verify it.]
 
 * * *
 
-## Architecture Overview
+## Implementation Map
 
-<!-- Provide the "big picture" before diving into phases.
-This section answers "what are we building and why does it look this way?"
-An implementer should be able to read this section alone and understand the overall
-design. -->
-
-### How it works
-
-[High-level description of the feature's runtime behavior, numbered steps or a short
-narrative.]
-
-### Key design decisions
-
-<!-- Ownership rule:
-- Architectural decisions (components, approach, trade-offs) belong in the design doc.
-  If one exists, link its Key Decisions section here — do not restate them.
-- Record here only decisions made during planning that the design doc doesn't cover:
-  phase structure, sequencing, and cross-phase choices.
-- Decisions confined to a single phase's code go in that phase's Design Decisions
-  subsection instead.
-Each entry names what was chosen, the alternatives considered, and why this approach
-wins. -->
-
-- **[Decision].** [Rationale.]
-
-### Component diagram
-
-<!-- ASCII art or a brief textual description showing how the new components relate to
-each other and to existing code.
-
-Omit this subsection if the feature is simple enough that a diagram adds no value.
+<!--
+Show implementation-specific state/data flow, attachment seams, and package ownership.
+If an accepted design already explains the architecture, link it and include only the
+implementation delta. Omit when the work packages and exact file pointers are enough.
 -->
 
-```
-[diagram]
-```
+### State and data flow
+
+[Short numbered flow or compact narrative.]
+
+### Attachment seams
+
+- `[existing/path/File.ext]` — [how new behavior attaches].
+
+### Planning decisions
+
+<!-- Only sequencing, work-package, or implementation decisions not owned by a design. -->
+
+- **[Decision].** [Chosen approach and why it best supports implementation.]
 
 * * *
 
-## Phase 1: [Title]
+## Work Package 1: [Title]
 
-<!-- A phase should be independently compilable and testable.
-If it can't be verified on its own, redraw the boundary — usually by merging it with
-the phase that consumes its output.
+[Capability or verified state this work package delivers and why it is ordered here.]
 
-Repeat this phase structure (Depends on, Done when, numbered sub-tasks, Design
-Decisions, Tests, Verification, Rollout, Implementation Notes) for every phase.
+**ID:** `WP1`
+**Depends on:** [Nothing, prerequisite, or stable work-package IDs]
+**Done when:** [Observable acceptance contract]
+**Checkpoint:** [Re-grounding action, or None]
+
+### 1.1 [Subtask Title]
+
+<!--
+Use File for an existing file, New file for an intended new path, Artifact for a
+non-code output, and Destination only in Conditional/Draft plans when an earlier
+handoff determines the exact new path. Every Destination requires a Checkpoint.
+Repeat a declaration when a subtask touches multiple files.
 -->
 
-[Brief description of this phase's goal and why it comes first.]
+**File:** `path/to/ExistingFile.ext`
 
-**Depends on:** [Nothing / Phase X (what it consumes). Say "can run in parallel with
-Phase Y" when order between phases is arbitrary.]
+[Describe the change, attachment seam, observable behavior, and important constraints.
+Point to existing patterns instead of copying them.]
 
-**Done when:** [One to three lines of observable end state — the phase-level acceptance
-target a PR reviewer can check the diff against.]
+**New file:** `path/to/NewFile.ext`
 
-### 1.1 [Sub-task Title]
-
-<!-- Label the file line "**File:**" for existing files, "**New file:**" for files that
-don't exist yet.
-These file lines are the source of truth for the File Inventory.
--->
-
-**File:** `path/to/File.java`
-
-[Description of what changes or what the new code does.
-Include short code snippets only to show interface shape or critical seams — see "Code
-in the plan" in SKILL.md.]
-
-```java
-// Short — interface signature, type definition, or the 5–15 line seam
-// where new code attaches to existing code. NOT a full implementation.
-// Reference existing patterns by pointer instead of duplicating source.
-```
+[Describe the new artifact's responsibility and public shape.]
 
 **Notes:**
-- [Implementation details, edge cases, or constraints worth calling out.]
 
-### 1.2 [Sub-task Title]
+- [Failure, cleanup, cancellation, concurrency, compatibility, or edge-case behavior.]
+- [Security, privacy, permission, migration, or observability constraint when relevant.]
 
-…
+### 1.2 [Subtask Title]
+
+**Artifact:** `path/to/generated-or-document-artifact`
+
+[Describe the artifact and its consumers.]
 
 ### Design Decisions
 
-<!-- Non-obvious choices confined to this phase's code.
-Each entry names the approach chosen, alternatives considered, and why this approach
-wins. Cross-phase or architectural decisions belong in Key design decisions or the
-design doc, not here.
+<!-- Omit if this work package has no non-obvious local decision. Architectural
+trade-offs belong in the design; cross-package sequencing belongs in the Implementation
+Map. -->
 
-Omit this subsection if the phase has no non-obvious design choices.
--->
+- **[Decision].** [Chosen approach, alternatives considered, and why they lost.]
 
-**[Decision title]:** [Approach chosen].
-[Alternatives considered and why they were rejected.]
+### Failure, Safety, and Security
+
+<!-- Omit only when none of these concerns materially applies. Cover failure states,
+rollback or cleanup, cancellation, permissions, privacy, trust boundaries, and unsafe
+fallbacks at the level appropriate to this work package. -->
+
+- [Failure or abuse case and required behavior.]
 
 ### Tests
 
-**File:** `path/to/TestFile.java`
-
-<!-- List test cases by name with a short description of what each verifies.
-For complex components (FSMs, handlers), use numbered sub-cases with explicit state
-diagrams and assertion lists.
--->
+**New file:** `path/to/TestFile.ext`
 
 Tests:
-- [Test description — what scenario, what assertion.]
-- [Test description.]
+
+- [Scenario, operation, and observable assertion.]
+- [Failure or boundary scenario and assertion.]
 
 ### Verification
 
 #### Automated
 
-- [ ] Standard gate for `[module]` — commands in
+- [ ] Standard gate for `[package-or-module]` — commands in
   [Verification Summary](#verification-summary)
-- [ ] [Phase-specific check, if any — e.g., a migration dry-run or integration test
-  outside the standard gate]
+- [ ] [Work-package-specific check not covered by the shared gate.]
+
+#### Agent review
+
+<!-- Use for source inspection that is not yet automated, such as dependency direction
+or forbidden coupling. Omit when unnecessary. -->
+
+- [ ] [Invariant to inspect and evidence to record.]
 
 #### Manual
 
-<!-- Omit this subsection if the phase can be fully verified by automated checks. -->
+<!-- Omit unless a genuinely human-only, subjective, physical-device, production, or
+externally authorized check is required. State whether it blocks the next dependency. -->
 
-These checks require a human. An agent implementing this phase must stop and request
-verification rather than checking these boxes.
-
-- [ ] [Observable behavior to verify by hand.]
+- [ ] [Human action and observable result.] [Blocking / non-blocking]
 
 ### Rollout
 
-<!-- Only for phases that ship an operational change: a migration that runs against
-live data, a feature flag, infra changes, or code that must deploy in a specific order
-relative to other changes.
-Cover: deploy ordering, flag state at ship time, the rollback story, and what to
-monitor after shipping.
+<!-- Omit when normal merge/deploy is sufficient. Otherwise cover ordering, flags,
+migration, rollback, and monitoring. -->
 
-Omit this subsection if the phase ships entirely through the normal merge-and-deploy
-path.
--->
-
-- [Deploy ordering, flag state, rollback story, what to watch.]
+- [Rollout and rollback contract.]
 
 ### Implementation Notes
 
-Filled in during implementation, not during planning. Record dated entries for
-deviations from the plan, surprises, and newly discovered work. If an entry invalidates
-a later phase or the File Inventory, update those sections too — the Notes are the
-changelog; the plan body is the current truth.
-
-<!-- Leave only the placeholder below in the initial plan.
-Example entry:
-- **2026-03-24:** Switched from subclass to composition for X because Y didn't expose
-  the needed hook. Phase 3 will need to inject X differently — Phase 3's sub-tasks
-  updated to match.
--->
+Filled in during implementation. Record dated deviations, surprises, and newly
+discovered work. Update later work packages, readiness, open decisions, and the File
+Inventory whenever a note invalidates them.
 
 *None yet.*
 
 * * *
 
-## Phase 2: [Title]
+## Work Package 2: [Title]
 
-<!-- Same structure as Phase 1. Add further phases as needed. -->
+<!-- Repeat the complete work-package structure. -->
 
-…
+[Capability or verified state.]
+
+**ID:** `WP2`
+**Depends on:** `WP1` ([what it consumes])
+**Done when:** [Observable acceptance contract]
+**Checkpoint:** [Re-grounding action, or None]
 
 * * *
 
 ## Rejected Splits
 
-<!-- Phase decompositions that looked tempting but would have left the codebase worse
-off — dead code, broken intermediate states, untestable partial work, or later phases
-forced to redo earlier ones.
-Documenting them here keeps the chosen split from being relitigated.
-For a single-phase plan, note here why no split survived.
+<!-- Omit when no plausible alternative split was considered. Record only boundaries
+that would have produced dead code, broken intermediate behavior, untestable partial
+work, forced rework, or repeated gates without a new capability. -->
 
-One or two sentences per rejected split.
-
-Omit this section if no plausible alternative splits were considered.
--->
-
-- **[Alternative split — e.g., "Split Phase 2 into 2a (data model) and 2b (handler
-  wiring)"].**
-  [Why it was rejected — e.g., "2a would have introduced an unused schema column with
-  no consumer, leaving the migration in a half-applied state until 2b shipped."]
+- **[Rejected boundary].** [Why the chosen work-package boundary is better.]
 
 * * *
 
 ## File Inventory
 
-<!-- A derived index of every file the plan touches.
-The per-sub-task file lines in the phases are the source of truth; regenerate this
-table from them whenever a phase changes, and reconcile it at each phase close.
-Use full repository paths.
-The Phase column plus the Progress section together answer "does this file exist
-yet" for an implementer starting mid-plan.
--->
+<!-- Derived from every File, New file, Destination, and Artifact declaration. Reconcile
+it whenever the plan changes. Ready plans must not contain Destination rows. -->
 
-| File | Phase | Change | Purpose |
+| Path or destination | Work package | Change | Purpose |
 | --- | --- | --- | --- |
-| `module/src/main/java/org/…/NewClass.java` | 1 | New | Brief purpose |
-| `module/src/test/java/org/…/NewClassTest.java` | 1 | New | Unit tests for NewClass |
-| `module/src/main/java/org/…/ExistingClass.java` | 2 | Modify | What changes |
+| `module/src/main/.../ExistingFile.ext` | `WP1` | Modify | [Purpose] |
+| `module/src/main/.../NewFile.ext` | `WP1` | New | [Purpose] |
+| `[destination owned by prior handoff]` | `WP2` | Destination | [Purpose and trigger] |
 
 * * *
 
 ## Verification Summary
 
-<!-- This section is the single home of the gate commands.
-Per-phase Verification checklists reference it and list only phase-specific extras.
-Adapt the commands to the project's build system (see "Adapting to the project" in
-SKILL.md); the commands below are a Maven example.
-In a flat (single-module) repo, replace the matrix with one per-phase command list.
--->
+<!-- Single home for shared commands. Prefer non-mutating checks. Put formatter apply
+commands in Preparation unless repository policy explicitly makes them part of the
+required gate. Do not repeat these command blocks in each work package. -->
 
-Standard per-phase gate:
+### Preparation
 
 ```bash
-mvn -q spotless:apply
-mvn -q -pl [module] clean compile
-mvn -q -pl [module] test -Dtest=[TestClass]
+[optional formatter or generator apply command]
 ```
 
-The final phase additionally runs a full build:
+### Standard affected-scope gate
 
 ```bash
-mvn -q clean verify
+[targeted tests]
+[type, lint, or formatting check]
+[affected package or module build]
 ```
 
-| Phase | Build scope | Test target |
+### Final plan gate
+
+```bash
+[full required verification]
+```
+
+| Work package | Scope | Required evidence |
 | --- | --- | --- |
-| 1 | `[module]` | `[TestClass]` |
-| 2 | `[module]` | `[TestClass]` |
-| Final | full build | all tests (`mvn -q clean verify`) |
+| `WP1` | `[package-or-module]` | [Commands, tests, or artifact inspection] |
+| `WP2` | `[package-or-module]` | [Commands, tests, or artifact inspection] |
+| Final | full plan | [Final gate] |
+
+* * *
+
+## Downstream Handoff
+
+<!-- Include when another plan consumes this one. Keep it concise. During initial
+planning leave "Pending implementation"; during implementation replace it with final
+contracts, deviations, verification evidence, downstream actions, and retained risks.
+Omit when there is no downstream consumer. -->
+
+*Pending implementation.*
+
+When complete, record:
+
+- **Public contracts and exact paths:** [Summary or links.]
+- **Design deviations:** [Summary and rationale.]
+- **Verification evidence:** [Commands and results.]
+- **Downstream actions:** [Configuration or re-grounding required.]
+- **Retained risks and unsupported behavior:** [Concise list.]
