@@ -1,0 +1,6 @@
+interface:
+  display_name: "Goal Orchestration"
+  short_description: "Run long Codex goals with durable bounded delegation"
+  default_prompt: "Use $goal-orchestration to coordinate this long-running Codex goal with durable state, compaction-safe recovery, clear ownership, bounded parallelism, unattended preflight, verification, and evidence."
+policy:
+  allow_implicit_invocation: false

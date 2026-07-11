@@ -1,0 +1,4 @@
+interface:
+  display_name: "Goal Prompting"
+  short_description: "Draft compact /goal prompts with bounded orchestration"
+  default_prompt: "Use $goal-prompting to turn these deliverables, referenced context, task-specific orchestration requirements, and stop conditions into a compact /goal prompt."
