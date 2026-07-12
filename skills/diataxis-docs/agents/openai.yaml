@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diátaxis Docs"
+  short_description: "Apply Diátaxis to docs work"
+  default_prompt: "Use $diataxis-docs to classify this README and suggest a focused restructuring plan."
