@@ -1,6 +1,6 @@
 ---
 name: writing-commit-messages
-description: "Create well-crafted git commits from session changes or staged work. Use this skill whenever the user asks to commit changes, says 'commit this', 'commit my changes', '/commit', 'create a commit', 'write a commit message', or any request to turn code changes into git commits. Also triggers when the user finishes a task and wants to commit the results, or says 'let's commit', 'save this', 'wrap this up with a commit', or similar."
+description: "Create well-crafted git commits from session changes or staged work. Use this skill whenever the user asks to commit changes, says 'commit this', 'commit my changes', '/commit', 'create a commit', 'write a commit message', or any request to turn code changes into git commits. Also use it when an autonomous goal or implementation workflow includes creating a commit. Direct user activation is approval-gated; incidental activation by an already-authorized workflow is not."
 ---
 Create git commits with clear, well-structured messages.
 
@@ -9,6 +9,23 @@ When conversation history is available (e.g., you worked on the changes in this
 session), use it to understand intent — but you’ll often be committing from a fresh
 session with no history, or the history may only cover part of the changes.
 In those cases, read the diff carefully and let the code speak for itself.
+
+## Approval mode
+
+Determine the activation mode before beginning:
+
+- **Explicit activation:** The user directly invokes this skill or asks to create a
+  commit as the primary action. Present the commit plan and wait for explicit approval
+  before staging or committing.
+- **Incidental activation:** An autonomous goal, implementation workflow, or other
+  higher-level process invokes this skill to perform a commit that the process already
+  authorizes. Do not add a redundant approval checkpoint. Inspect the changes, plan the
+  commit internally, and execute it as part of that workflow.
+
+Treat an invocation as incidental only when the governing task already authorizes the
+commit. A request to implement changes does not, by itself, grant permission to commit
+unless the surrounding workflow establishes that behavior. When the distinction is
+genuinely ambiguous, use explicit activation mode.
 
 ## Process
 
@@ -26,17 +43,23 @@ In those cases, read the diff carefully and let the code speak for itself.
    - Group related files together
    - Draft each commit message using the format below
 
-3. **Present your plan and wait for approval:**
-   - For each planned commit, show:
+3. **Handle the commit plan according to the approval mode:**
+   - For explicit activation, show for each planned commit:
      - The files to be staged
      - The full commit message
-   - Ask: “I plan to create N commit(s) with these changes.
+   - For explicit activation, ask: “I plan to create N commit(s) with these changes.
      Shall I proceed?”
-   - **Do not execute until the user explicitly approves.** If the user requests
-     changes, revise the plan and ask for approval again — every revision resets the
-     approval.
+   - For explicit activation, **do not execute until the user explicitly approves.**
+     If the user requests changes, revise the plan and ask for approval again — every
+     revision resets the approval.
+   - For incidental activation, keep the plan internal unless the governing workflow
+     requests a progress summary. Do not present it as an approval gate or pause for
+     confirmation. Continue directly to execution.
 
-4. **Execute only after explicit approval:**
+4. **Execute after the required authorization:**
+   - In explicit activation mode, execute only after explicit user approval
+   - In incidental activation mode, the governing workflow's authorization is
+     sufficient
    - Stage specific files with `git add <file>` (never use `-A` or `.`)
    - Create commits using a HEREDOC for the message to preserve formatting
    - Show the result with `git log --oneline -n N`
