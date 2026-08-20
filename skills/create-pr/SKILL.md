@@ -12,6 +12,10 @@ solution. Do not lead with an implementation inventory.
 Do not include counts of files, tests added, or lines of code changed.
 Instead, focus on the problem being solved and the approach taken.
 
+Tell the story in prose, not in headings.
+If the body uses section headings, keep them to a few plain structural labels
+- never sentences that carry the narrative, and never one heading per fix or finding.
+
 ## Gathering context
 
 Combine sources rather than relying on one: the user’s original prompt says why, the
