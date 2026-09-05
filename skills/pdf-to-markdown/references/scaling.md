@@ -1,10 +1,11 @@
 # Scaling: huge single PDFs and collections
 
-The base architecture (`references/architecture.md`) was proven on documents up to ~366 pages with clean clause numbering. A 1500-page / 20 MB standard (think BACnet) breaks three assumptions:
+Large documents and collections require explicit page windows and ownership. Read this
+when the source cannot be handled as a small set of bounded sections. Common problems:
 
 1. **Clause numbers may not map to a clean fragment grid** — sections are deep, irregular, or unnumbered.
 2. **One map agent cannot skim the whole document** — it can't read 1500 pages in a few calls to plan fragments.
-3. **A single `parallel()` over every section overruns the concurrency ceiling (~16)** and floods the orchestrator's context.
+3. **Unbounded concurrent work exceeds host capacity** and floods the coordinator's context.
 
 Here is how to keep fidelity at that scale, and how to handle a shelf of related PDFs.
 
@@ -19,14 +20,14 @@ Run `scripts/pdf_probe.py`. You need: page count and size; a per-page text-layer
 In priority order:
 
 - **Outline/bookmarks exist (best case).** Walk the outline. Each top- or second-level node becomes a candidate section spanning `[node.page, nextNode.page − 1]`. This replaces the human-supplied page anchors the small-document flow relied on. Use the bookmark title as the section title and source of the slug.
-- **A printed TOC but no bookmarks.** Dispatch a **TOC-reader agent** that reads only the contents pages (a few `Read` calls) and returns `{title, printed_page}` rows; convert printed→PDF with the offset from `pdf_pagemap.py`.
+- **A printed TOC but no bookmarks.** Dispatch a **TOC-reader agent** that reads only the contents pages (bounded source-page reads) and returns `{title, printed_page}` rows; convert printed→PDF with the offset from `pdf_pagemap.py`.
 - **Neither (worst case).** Fall back to **fixed page-window tiling**: slice the body into ~10–12-page windows. Section boundaries are recovered at convert time by the agent detecting headings within its window.
 
 ### Step 2 — Normalize sections to page-range windows (the map output)
 
 Emit the same `MAP_SCHEMA` fragment records, but produced from the section index:
 
-- Each fragment is a **window** of `pdf_pages` small enough to read in ≤2 `Read` calls (≤ ~30 pages; prefer ≤15). A `Read` caps at 20 pages and you want ≤15 per call.
+- Each fragment is a **window** of `pdf_pages` small enough for the available reader and context. Start around 10–15 pages and reduce the window for dense scans or tables. Read the actual host limits rather than assuming a universal page cap.
 - If one bookmarked section spans more than ~30 pages, or its `est_lines` would exceed ~600, **sub-tile** it into `…a/b/c` windows at map time.
 - Derive `target_file` from a slugified heading plus a **zero-padded ordinal** (`bacnet/0137-who-is.md`) so files sort in document order even without clause numbers.
 - Carry a `parent_section` field so windows of the same logical section can be stitched later.
@@ -45,25 +46,11 @@ Concretely for a 1500-page spec: outline → ~150–400 sections → normalize t
 
 ## Concurrency — batch, never one giant barrier
 
-There is roughly a **~16 concurrent-agent ceiling**. 162 agents in one `parallel()` happened to work for a small corpus but is the wrong primitive at 500+ windows: most agents queue anyway, the barrier waits for the slowest, and the orchestrator's context fills with hundreds of simultaneous returns.
-
-Replace the single `parallel(allFragments)` with a **batched pipeline**:
-
-```js
-// process windows in waves of ~14, staying under the cap with headroom
-const BATCH = 14
-const results = []
-for (let i = 0; i < fragments.length; i += BATCH) {
-  const batch = fragments.slice(i, i + BATCH)
-  const batchResults = await parallel(batch.map(f => () =>
-    agent(convertPrompt(f), { label: `conv:${f.target_file}`, phase: 'Convert', schema: CONVERT_SCHEMA, effort: effortFor(f) })
-  ))
-  results.push(...batchResults)
-  log(`converted ${Math.min(i + BATCH, fragments.length)}/${fragments.length}`)
-}
-```
-
-This also bounds blast radius: a poisoned page or a hung agent stalls one wave, not the whole run. Keep `effortFor` tiering so cheap prose pages don't burn `high` effort.
+Choose a bounded worker count from the host's available capacity, including any slots
+used by the coordinator. Queue remaining fragments and persist results as each batch
+finishes. When delegation is unavailable or adds no value, process the same windows
+sequentially. The optional Claude adapter in references/claude-workflow.md describes
+its Workflow templates; do not assume those primitives or model controls exist elsewhere.
 
 ## Boundary handling — own every page exactly once
 
@@ -74,7 +61,7 @@ Two mechanisms, used together:
 1. **Cut windows at child-section boundaries, not arbitrary page counts.** `scripts/plan_from_outline.py` ends each window at the page before the next child section begins, so a long section is never split at a no-heading page (a single child larger than the window is page-tiled as a fallback). Each windowed fragment carries `prev_end` — the previous window's last page — for the ownership rule below.
 2. **Own pages by a precise rule in the convert prompt.** Pass each window its `prev_end` and instruct: *Read your full range, but page `prev_end` is context only — do not re-transcribe it (the previous window owns it). Begin new transcription at `prev_end + 1`, top to bottom, including any content above the first heading (it is the tail of a section continued from the previous window — emit it under a `> _(continued from previous window: …)_` note). If a section runs past your last page, transcribe what is on your pages and set `continues: true`.* This captures the shared-page tail (no drop) without re-emitting the overlap page (no duplication). Verified on BACnet: with this rule, window 2 of `13.3` correctly leads with `13.3.8`'s carried-over condition (m), its transition figure, and its notification-parameters table — content that "start at the first heading" silently dropped.
 
-A wide table that visually straddles a page boundary is the residual case: each window transcribes its portion and notes "table continues"; the verify pass flags it for a manual join. Rare, and far less costly than a silent drop.
+A wide table that visually straddles a page boundary is the residual case: each window transcribes its portion and notes "table continues"; the verification pass joins the portions against the source. Rare, and far less costly than a silent drop.
 
 ## Keeping accuracy high at scale
 
@@ -85,7 +72,7 @@ A wide table that visually straddles a page boundary is the residual case: each 
 
 ## Collections of PDFs
 
-- **One map per document, run in `parallel()`** (the documents are independent and few). Each produces `_maps/<doc>.json` with its own offset, target region, and fragments.
+- **One map per document**, processed directly or with bounded authorized delegation. Each produces `_maps/<doc>.json` with its own offset, target region, and fragments.
 - **Merge into a shared index.** `scripts/build_all_map.py` builds `_all.json = {docMeta, linkIndex, fragments}` where `fragments` is the flat union tagged with `doc`, `docMeta[doc]` holds `{pdf_file, offset, clean}`, and `linkIndex` maps shared identifiers (mnemonics, named clauses) to files across the whole collection. Every convert agent receives the whole `linkIndex`, so any fragment can link to any other.
 - **Namespace by document** (`md/<doc>/…`) so slugs don't collide across documents and every cross-link resolves with a single `../`.
 - **Link, don't duplicate, across documents.** Where document A references a definition in document B, link `../<docB>/<file>` rather than re-converting B's content. Pick an **anchor document** for the README intro that explains how the documents relate (the original used 104 as the network-access anchor that selects 101's ASDUs and maps to 5-5's functions).

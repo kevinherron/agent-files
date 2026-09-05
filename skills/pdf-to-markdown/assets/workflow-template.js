@@ -31,7 +31,7 @@ export const meta = {
 // ---- PARAMETERS -------------------------------------------------------------
 const ROOT = '/ABSOLUTE/PATH/TO/md'          // <-- the one output root; every agent writes only under here
 const ALL_JSON = `${ROOT}/_maps/_all.json`
-const BATCH = 14                              // convert wave size; keep < ~16 concurrency ceiling
+const BATCH = 1                               // set from available host worker slots; no universal cap
 
 // ---- SCHEMAS ----------------------------------------------------------------
 const CONVERT_SCHEMA = {
@@ -144,7 +144,7 @@ for (let i = 0; i < fragments.length; i += BATCH) {
   convResults.push(...out)
   log(`converted ${Math.min(i + BATCH, fragments.length)}/${fragments.length}`)
 }
-// For a SMALL corpus (<~60 fragments) you can replace the loop above with a single barrier:
+// Only when all fragments fit the verified available worker slots, a single batch is sufficient:
 //   const convResults = await parallel(fragments.map(f => () => agent(convertPrompt(...), {...})))
 const meta2 = convResults.filter(Boolean)
 const died = fragments.filter((f, i) => !convResults[i]).map((f) => f.target_file)
