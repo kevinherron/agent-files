@@ -1,6 +1,6 @@
 ---
 name: writing-technical-design-documents
-description: Write a standalone Markdown technical design document from a structured template (Problem, Goals, Constraints, Scope, Proposed Approach, Key Decisions, Assumptions, and Risks). Use whenever the user asks to write, draft, or create a technical design document, design doc, technical design, RFC, tech spec, or architecture proposal — "write a design for X", "draft a design doc", "spec out how we'd build X" — or wants an approach evaluation captured as a written document before implementation. Do not use for documenting only how an existing system works. For a phased, file-level execution plan of an already-decided approach, use writing-implementation-plan-documents instead.
+description: "Write a technical design document explaining an approach and its decisions. Excludes implementation plans and references describing only an existing system."
 ---
 # Writing Technical Design Documents
 

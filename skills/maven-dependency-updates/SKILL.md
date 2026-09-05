@@ -1,87 +1,45 @@
 ---
 name: maven-dependency-updates
-description: "Check a Maven project for newer dependency and plugin versions using the versions plugin, then optionally apply them. Use this skill whenever the user wants to update Maven dependencies or plugins, check for outdated versions, run versions:display-dependency-updates or versions:display-plugin-updates, 'bump dependencies', 'check for dependency updates', 'update the pom', or otherwise look for available version upgrades in a Maven (pom.xml) project."
+description: Check or update Maven dependency and plugin versions. Applies to version upgrades, not arbitrary pom.xml edits.
 ---
-Use the Maven versions plugin to look for dependency and plugin version updates,
-present them to the user, and apply the ones they approve.
+# Maven dependency updates
 
-## Process
+Distinguish a report-only request from an update request. Checking for newer versions
+produces a report without edits. An update request authorizes the specified upgrades and
+necessary compatible fixes within that scope; do not ask the user to approve them again.
+Ask only when a material version, compatibility, or scope choice cannot be resolved from
+the request and repository constraints.
 
-### 1. Check for updates
+## Discover and apply
 
-Run both report goals from the directory containing the root `pom.xml`:
+Use the repository's Maven wrapper or configured Maven environment. For a general update
+survey, run from the root POM:
 
-```
+```text
 mvn versions:display-dependency-updates
 mvn versions:display-plugin-updates
 ```
 
-- `versions:display-dependency-updates` reports dependencies that have newer
-  versions available.
-- `versions:display-plugin-updates` reports build plugins that have newer
-  versions available.
+Narrow reporting for a specific requested upgrade. Report artifact coordinates and old
+and proposed versions. Default to stable releases; distinguish alpha, beta, RC, milestone,
+and snapshot versions. Preserve explicit version and compatibility constraints.
 
-These goals only **report**; they do not modify any files.
+Update shared properties or dependencyManagement/pluginManagement declarations at their
+source. Do not bump unrelated dependencies. Inspect release or migration guidance when
+compatibility changes could affect the upgrade.
 
-In a multi-module (reactor) build, run the goals from the root and they will cover
-the whole project.
+## Verify and finish
 
-### 2. Summarize and present
+Run affected-module builds and tests while iterating, then the repository's required
+verification gate for the completed upgrade. Use `mvn clean verify` when that is the
+appropriate project gate. Run `dependency:resolve` separately only when diagnosing
+resolution or when specifically required; a successful build already resolves its inputs.
 
-Parse the output and present a clear summary to the user, grouped into
-**dependencies** and **plugins**. For each entry show the artifact (groupId:artifactId),
-the current version, and the proposed new version.
+Investigate failures and fix those caused by the requested upgrade when the fixes preserve
+the intended behavior and fit the authorized scope. Rerun affected checks after fixes.
+Do not weaken tests or change public behavior merely to make an upgrade pass. For a
+material migration beyond scope, complete independent upgrades and present the concrete
+remaining choice. Honor a request limited to POM edits.
 
-Flag non-stable versions explicitly. The plugin will often suggest alpha, beta, RC,
-milestone, or snapshot versions — call these out separately and default to
-recommending the latest **stable release** unless the user asks otherwise.
-
-Then ask the user whether they want to apply the updates, and which ones (all, or a
-subset). **Do not modify anything until the user responds.**
-
-If the user does **not** want to apply updates, there is nothing further to do. Stop here.
-
-### 3. Apply the approved updates
-
-Edit the `pom.xml` file(s) directly to set the approved versions.
-
-- Prefer editing the **version property** (e.g. `<some.lib.version>`) when the version
-  is defined in `<properties>` and reused — change it in one place rather than at each
-  declaration site.
-- Otherwise edit the `<version>` element on the specific dependency or plugin.
-- In multi-module projects, versions are usually declared once in the parent's
-  `<dependencyManagement>` / `<pluginManagement>` or in `<properties>`; update there.
-- Apply only the versions the user approved. Do not silently bump anything else.
-
-### 4. Verify dependencies resolve
-
-```
-mvn dependency:resolve
-```
-
-If there are resolution errors (e.g. a version doesn't exist, or a coordinate
-changed), fix them — correct the version, adjust the coordinate, or revert that
-specific update — then re-run until resolution succeeds.
-
-### 5. Verify the build and tests
-
-```
-mvn clean verify
-```
-
-This ensures the project still compiles and the tests pass with the new versions.
-
-**If there are errors at this stage, investigate and make suggestions to the user,
-but do not modify any code.** The goal of this step is to confirm whether the version
-updates are safe — not to refactor the project to accommodate them. Report what broke
-and what you'd recommend (e.g. a migration step, a different version, or reverting a
-particular update), and let the user decide.
-
-## Guidelines
-
-- Only the version-application step (3) changes files. Steps 1, 4, and 5 are read/verify.
-- Keep the user in control: present first, apply only what's approved.
-- Default to stable releases; surface pre-release/snapshot suggestions but don't apply
-  them unless asked.
-- If a build fails after updating, never edit source code to make it pass — investigate
-  and advise instead.
+Report applied versions, verification results, and any deferred upgrades or unresolved
+failures. Distinguish pre-existing failures from regressions when evidence permits.

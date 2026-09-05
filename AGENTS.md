@@ -7,8 +7,9 @@ These are my communication and coding preferences.
 
 # Coding style
 
-Write code that is easy to read, understand, and verify.
-Keep it simple, correct, fast; in that order. Avoid duplication and overengineering.
+Write correct code that is easy to read, understand, and verify.
+Prefer the simplest design that satisfies the requirements.
+Optimize when measurements or explicit constraints justify it. Avoid premature abstraction.
 
 # Writing style
 

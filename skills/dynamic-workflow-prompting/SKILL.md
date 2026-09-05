@@ -1,6 +1,6 @@
 ---
 name: dynamic-workflow-prompting
-description: "Draft and refine a compact, copy-ready prompt that a user pastes into Claude Code to kick off a dynamic workflow — multi-agent orchestration run by the Workflow tool. Use when the user wants a prompt that triggers a workflow, wants to turn messy notes or a goal into a workflow request, asks how to structure a request that fans out subagents in parallel, or needs a prompt that states deliverables, referenced context, success and stop conditions, and the authorization that lets Claude launch a workflow. Produces the trigger prompt only; it does not run the workflow."
+description: "Draft a copy-ready Claude Code prompt for an explicitly requested dynamic multi-agent workflow. Produces the prompt, not the workflow run."
 ---
 
 # Dynamic Workflow Prompting

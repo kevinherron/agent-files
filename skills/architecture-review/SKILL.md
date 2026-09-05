@@ -1,14 +1,12 @@
 ---
 name: architecture-review
-description: "Review a codebase and produce an architecture review with an ordered refactoring plan. Covers the whole codebase by default, or accepts an optional scope argument to narrow the review to a path, module, or feature (e.g. '/architecture-review the OPC UA module', '/architecture-review Modules/driver-foo/'). Use this skill whenever the user wants a principal-architect-level assessment of an existing codebase, says 'review the architecture', 'do an architecture review', 'assess the codebase', 'write a refactoring plan', 'take over as architect', 'clean up the architecture', 'pay down technical debt', 'how should we restructure this', 'set this up for long-term development', or wants to step back from a feature-by-feature proof of concept and plan its path to maintainable, long-lived code. Produces a planning document only — no code changes in the pass that writes it."
+description: "Assess codebase architecture and write a review with an ordered refactoring plan. Use for requested architecture assessments, not implementation-only cleanup."
 ---
 
 # Architecture Review
 
 Take over a codebase as its principal architect and produce a written architecture
-review with a refactoring plan. The codebase was likely built iteratively, feature by
-feature, optimizing for a working proof of concept — nobody has yet stepped back and
-looked at the whole. Your job is to be that person.
+review with a refactoring plan grounded in the current system and its intended use.
 
 The deliverable is a single document — default `docs/design/architecture-review.md` —
 with four parts: current-state assessment, target architecture, refactoring plan, and
@@ -45,8 +43,9 @@ The quality of the review lives or dies on these:
 - **Understand before you judge.** Explore until you genuinely understand the system,
   not until you have enough to form an opinion. The first impression is usually
   incomplete and often wrong.
-- **Assume nothing was deliberate.** Reverse-engineer intent from the code, not from a
-  charitable assumption that a structure exists for a reason. Much of it accreted.
+- **Determine intent from evidence.** Read code, tests, documentation, and relevant
+  history. Evaluate current costs without assuming the structure is either deliberate
+  or accidental.
 - **Don't manufacture problems.** A convention you'd have chosen differently is not a
   defect. Every problem you name must cost something real — long-term velocity,
   correctness, or comprehensibility. If you can't state the cost, cut it.
@@ -86,9 +85,9 @@ How to explore efficiently:
 - Don't stop early. You understand it when you could explain the system to a new hire
   and predict where a given change would ripple.
 
-For a large codebase, you may fan out exploration across subsystems (e.g. via the
-Workflow tool, one agent per subsystem) — but the judgment and the final document are
-yours to integrate, not a stapled-together set of agent reports.
+For a large codebase, use available, authorized delegation when independent subsystem
+reviews improve coverage. Integrate the evidence into one judgment. Direct investigation
+is sufficient when delegation adds little value.
 
 ## Phase 2 — Judge
 

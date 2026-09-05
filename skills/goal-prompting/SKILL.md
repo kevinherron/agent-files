@@ -1,6 +1,6 @@
 ---
 name: goal-prompting
-description: "Draft and refine compact Codex /goal prompts that state deliverables, referenced context, stop conditions, and optional execution skills without embedding a long orchestration playbook. Use when the user wants a copy-ready /goal prompt, wants to turn messy notes into a Codex goal, asks how to structure a goal, or needs a goal that points to files, repositories, docs, or $goal-orchestration with explicit ownership, sequencing, separate-thread, or bounded parallel-work requirements."
+description: "Draft compact Codex /goal prompts with deliverables, context, and completion criteria. Does not execute the goal."
 ---
 
 # Goal Prompting

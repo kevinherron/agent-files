@@ -1,6 +1,6 @@
 ---
 name: writing-implementation-plan-documents
-description: Write a standalone Markdown implementation plan or coordinated plan set for an already-decided feature or change, with readiness state, code grounding, capability-based work packages, file-level changes, acceptance criteria, verification, and downstream handoffs. Use whenever the user asks to write, draft, or create an implementation plan, technical plan, engineering plan, feature plan, migration plan, phased execution plan, or breakdown of how to build a design, research result, specification, or ticket. For deciding and justifying the architecture itself, use writing-technical-design-documents first. Do not use for project scheduling or quick verbal plans.
+description: "Write a Markdown implementation plan for an already-decided change. Use for requested engineering plans, not quick verbal planning or architecture decisions."
 ---
 
 # Writing Implementation Plans
@@ -86,9 +86,9 @@ after WPx`, and keep the plan `Conditional` until that checkpoint is resolved.
 
 ## Right-Sizing And Plan Sets
 
-- For work touching only a handful of files with one natural acceptance boundary, offer
-  direct implementation or a short task list. If the user still wants a plan, collapse
-  the template as described in its comments.
+- For work touching only a handful of files with one natural acceptance boundary, write
+  the requested plan directly using the collapsed template described in its comments.
+  Do not require the user to ask for a plan twice or substitute implementation.
 - One work package is valid. Do not manufacture phases.
 - Split work at independently verifiable capabilities, API or module seams, migration
   states, compatibility boundaries, or rollout boundaries. Session length, PR size,

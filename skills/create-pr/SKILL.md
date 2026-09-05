@@ -1,6 +1,6 @@
 ---
 name: create-pr
-description: Use when the user asks to create or open a pull request (PR).
+description: "Create or update a GitHub pull request for the requested changes."
 ---
 # Create PR
 
@@ -33,7 +33,7 @@ Without the original prompt, reconstruct the rationale from the commits, issue, 
 
 Prefer the `gh` CLI when it is available and authenticated for the repository host (`gh auth status`).
 
-1. Inspect the current branch, working tree, and remotes. Require a named branch. If uncommitted changes appear to belong in the requested PR, stop and explain that the PR cannot include them yet. Do not assume a dirty working tree is represented by `HEAD`.
+1. Inspect the current branch, working tree, and remotes. Require a named branch. If uncommitted changes belong in the requested PR and the task authorizes committing them, inspect and commit that scope before publishing. Otherwise prepare the PR context and ask only for the missing scope or commit authorization. Leave unrelated changes alone. Do not assume a dirty working tree is represented by `HEAD`.
 
 2. Check the target repository for an existing open PR from the current branch. Prefer machine-readable output, for example:
 
@@ -41,7 +41,7 @@ Prefer the `gh` CLI when it is available and authenticated for the repository ho
    gh pr list --state open --head <branch> --json url,number,title,baseRefName,isDraft
    ```
 
-   Add `--repo <owner/repo>` when the target repository is not the one inferred by `gh`. If an existing PR already satisfies the request, report its URL instead of opening a duplicate. If it needs changes, explain them and ask before updating the existing PR.
+   Add `--repo <owner/repo>` when the target repository is not the one inferred by `gh`. If an existing PR already satisfies the request, report its URL instead of opening a duplicate. If it needs changes within the requested scope, update it when existing authorization covers those changes. Ask only about material scope differences or missing authorization.
 
 3. Resolve the push remote from the branch upstream and repository remotes. Push the current `HEAD` so the hosted branch includes all local commits. Add `-u` only when the branch has no upstream. Do not assume the push remote is named `origin`. Stop on a rejected push, and never force-push unless the user explicitly authorizes it.
 

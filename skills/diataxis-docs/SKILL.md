@@ -1,6 +1,6 @@
 ---
 name: diataxis-docs
-description: Apply the Diataxis documentation framework to classify, write, revise, restructure, and review documentation around user needs. Use when Codex works on documentation writing, documentation revision, documentation classification, mode confusion, information architecture, README/API docs, tutorials, how-to guides, reference docs, explanations/conceptual docs, troubleshooting docs, onboarding docs, docs quality reviews, or requests such as "use Diataxis", "make this clearer", "turn this into docs", "organize these docs", or "split this mixed documentation". Do not trigger solely for ordinary code comments unless the user frames them as documentation quality, public docs, or documentation structure.
+description: "Use Diataxis to write, review, or restructure user-facing documentation by reader need. Excludes ordinary prose edits and code comments."
 ---
 
 # Diataxis Docs
