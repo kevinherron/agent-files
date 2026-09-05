@@ -1,4 +1,0 @@
-interface:
-  display_name: "Writing Research Documents V2"
-  short_description: "Create evidence-backed research documents"
-  default_prompt: "Use $writing-research-documents-v2 to investigate this topic and create an evidence-backed Markdown research document."

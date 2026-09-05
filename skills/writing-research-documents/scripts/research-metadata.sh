@@ -1,72 +1,94 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
-# Generate YAML frontmatter metadata for research documents
-#
-# Usage:
-#   New document:
-#     research-metadata.sh [--topic "topic"] [--tags "tag1,tag2,tag3"] [--status "status"] [--repo /path/to/repo]
-#
-#   Update existing document:
-#     research-metadata.sh --update [--note "description of changes"]
-#
-# Git metadata (commit, branch, repository, dirty flag) is read from --repo if given,
-# otherwise from the current directory. Point it at the repository the research is
-# ABOUT, not the repository the document lives in.
-#
-# Examples:
-#   ./research-metadata.sh --topic "Authentication flow analysis" --tags "research,auth,gateway"
-#   ./research-metadata.sh --repo ~/src/milo --topic "Session lifecycle survey"
-#   ./research-metadata.sh --update --note "Added follow-up on token refresh"
+# Generate YAML frontmatter for a new or updated research document.
 
 set -euo pipefail
 
 usage() {
-    awk 'NR > 2 { if ($0 !~ /^#/) exit; sub(/^# ?/, ""); print }' "$0"
-    exit 0
+    cat <<'EOF'
+Usage:
+  research-metadata.sh --topic TEXT [--tags CSV] [--status STATUS]
+                       [--repo PATH] [--researcher NAME]
+  research-metadata.sh --update [--note TEXT] [--repo PATH]
+                       [--researcher NAME]
+
+Statuses: draft, in-progress, complete
+
+Omit --repo for non-repository research. When supplied, PATH must be inside the
+repository being researched, not merely the directory receiving the document.
+EOF
 }
 
-# Escape backslashes and double quotes for YAML double-quoted string safety
+die() {
+    printf 'error: %s\n' "$*" >&2
+    exit 2
+}
+
+require_value() {
+    local option="$1"
+    local remaining="$2"
+    local next_value="${3:-}"
+    [[ "$remaining" -ge 2 && -n "$next_value" && "$next_value" != --* ]] ||
+        die "$option requires a value"
+}
+
 escape_yaml() {
-    local s="${1//\\/\\\\}"
-    printf '%s' "${s//\"/\\\"}"
+    local value="$1"
+    value=${value//\\/\\\\}
+    value=${value//\"/\\\"}
+    value=${value//$'\n'/\\n}
+    value=${value//$'\r'/\\r}
+    printf '%s' "$value"
 }
 
-# Trim leading and trailing whitespace
+yaml_string() {
+    printf '"%s"' "$(escape_yaml "$1")"
+}
+
 trim() {
-    local s="$1"
-    s="${s#"${s%%[![:space:]]*}"}"
-    s="${s%"${s##*[![:space:]]}"}"
-    printf '%s' "$s"
+    local value="$1"
+    value="${value#"${value%%[![:space:]]*}"}"
+    value="${value%"${value##*[![:space:]]}"}"
+    printf '%s' "$value"
 }
 
-# Defaults
 TOPIC=""
-TAGS="research,codebase"
+TAGS="research"
 STATUS="complete"
-REPO_PATH="."
+REPO_PATH=""
+RESEARCHER=""
 UPDATE_MODE=false
 UPDATE_NOTE=""
 
-# Parse arguments
 while [[ $# -gt 0 ]]; do
-    case $1 in
+    case "$1" in
         -h|--help)
             usage
+            exit 0
             ;;
         --topic)
+            require_value "$1" "$#" "${2:-}"
             TOPIC="$2"
             shift 2
             ;;
         --tags)
+            require_value "$1" "$#" "${2:-}"
             TAGS="$2"
             shift 2
             ;;
         --status)
+            require_value "$1" "$#" "${2:-}"
             STATUS="$2"
             shift 2
             ;;
         --repo)
+            require_value "$1" "$#" "${2:-}"
             REPO_PATH="$2"
+            shift 2
+            ;;
+        --researcher)
+            require_value "$1" "$#" "${2:-}"
+            RESEARCHER="$2"
             shift 2
             ;;
         --update)
@@ -74,72 +96,100 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --note)
+            require_value "$1" "$#" "${2:-}"
             UPDATE_NOTE="$2"
             shift 2
             ;;
         *)
-            echo "Unknown option: $1" >&2
-            exit 1
+            die "unknown option: $1"
             ;;
     esac
 done
 
-# Gather metadata
-# Format timezone as +00:00 instead of +0000 for ISO 8601 compliance
-DATE_ISO=$(date +"%Y-%m-%dT%H:%M:%S%z" | sed 's/\([+-][0-9][0-9]\)\([0-9][0-9]\)$/\1:\2/')
-RESEARCHER=$(git -C "$REPO_PATH" config user.name 2>/dev/null || echo "Unknown")
+case "$STATUS" in
+    draft|in-progress|complete) ;;
+    *) die "invalid status '$STATUS' (expected draft, in-progress, or complete)" ;;
+esac
 
-# Update mode: output only the fields needed to update existing frontmatter
 if [[ "$UPDATE_MODE" == true ]]; then
-    echo "last_updated: ${DATE_ISO}"
-    echo "last_updated_by: ${RESEARCHER}"
+    [[ -z "$TOPIC" ]] || die "--topic is not valid with --update"
+    [[ "$TAGS" == "research" ]] || die "--tags is not valid with --update"
+    [[ "$STATUS" == "complete" ]] || die "--status is not valid with --update"
+else
+    [[ -n "$(trim "$TOPIC")" ]] || die "--topic is required for a new document"
+fi
+
+if [[ -n "$REPO_PATH" ]]; then
+    [[ -d "$REPO_PATH" ]] || die "repository path does not exist: $REPO_PATH"
+    git -C "$REPO_PATH" rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
+        die "--repo is not inside a Git repository: $REPO_PATH"
+fi
+
+if [[ -z "$RESEARCHER" ]]; then
+    if [[ -n "$REPO_PATH" ]]; then
+        RESEARCHER=$(git -C "$REPO_PATH" config user.name 2>/dev/null || true)
+    fi
+    if [[ -z "$RESEARCHER" ]]; then
+        RESEARCHER=$(git config --global user.name 2>/dev/null || true)
+    fi
+    if [[ -z "$RESEARCHER" ]]; then
+        RESEARCHER="${USER:-Unknown}"
+    fi
+fi
+
+DATE_ISO=$(date +"%Y-%m-%dT%H:%M:%S%z" | sed 's/\([+-][0-9][0-9]\)\([0-9][0-9]\)$/\1:\2/')
+
+emit_repository_fields() {
+    local commit branch repository dirty
+    commit=$(git -C "$REPO_PATH" rev-parse HEAD)
+    branch=$(git -C "$REPO_PATH" branch --show-current)
+    [[ -n "$branch" ]] || branch="detached"
+    repository=$(basename "$(git -C "$REPO_PATH" rev-parse --show-toplevel)")
+    dirty=false
+    [[ -z "$(git -C "$REPO_PATH" status --porcelain)" ]] || dirty=true
+
+    printf 'repository: %s\n' "$(yaml_string "$repository")"
+    printf 'git_commit: %s\n' "$(yaml_string "$commit")"
+    printf 'branch: %s\n' "$(yaml_string "$branch")"
+    printf 'dirty: %s\n' "$dirty"
+}
+
+if [[ "$UPDATE_MODE" == true ]]; then
+    printf 'last_updated: %s\n' "$(yaml_string "$DATE_ISO")"
+    printf 'last_updated_by: %s\n' "$(yaml_string "$RESEARCHER")"
     if [[ -n "$UPDATE_NOTE" ]]; then
-        echo "last_updated_note: \"$(escape_yaml "$UPDATE_NOTE")\""
+        printf 'last_updated_note: %s\n' "$(yaml_string "$UPDATE_NOTE")"
+    fi
+    if [[ -n "$REPO_PATH" ]]; then
+        emit_repository_fields
     fi
     exit 0
 fi
 
-# Full frontmatter mode
-GIT_COMMIT=$(git -C "$REPO_PATH" rev-parse HEAD 2>/dev/null || echo "unknown")
-BRANCH=$(git -C "$REPO_PATH" branch --show-current 2>/dev/null || echo "unknown")
-REPO=$(basename "$(git -C "$REPO_PATH" rev-parse --show-toplevel 2>/dev/null || echo "unknown")")
-DIRTY=false
-if [[ -n "$(git -C "$REPO_PATH" status --porcelain 2>/dev/null)" ]]; then
-    DIRTY=true
-fi
-
-# Convert comma-separated tags to YAML array format
-IFS=',' read -ra TAG_ARRAY <<< "$TAGS"
-TAGS_YAML="["
-for i in "${!TAG_ARRAY[@]}"; do
-    if [[ $i -gt 0 ]]; then
-        TAGS_YAML+=", "
+IFS=',' read -r -a tag_values <<< "$TAGS"
+tags_yaml="["
+tag_count=0
+for raw_tag in "${tag_values[@]}"; do
+    tag=$(trim "$raw_tag")
+    [[ -n "$tag" ]] || die "tags must not contain empty values"
+    if [[ "$tag_count" -gt 0 ]]; then
+        tags_yaml+=", "
     fi
-    tag=$(trim "${TAG_ARRAY[$i]}")
-    TAGS_YAML+="\"$(escape_yaml "$tag")\""
+    tags_yaml+="$(yaml_string "$tag")"
+    tag_count=$((tag_count + 1))
 done
-TAGS_YAML+="]"
+tags_yaml+="]"
+[[ "$tag_count" -gt 0 ]] || die "at least one tag is required"
 
-# Escape topic for YAML output
-TOPIC_ESCAPED=$(escape_yaml "$TOPIC")
-
-# Output YAML frontmatter
-cat << EOF
----
-date: ${DATE_ISO}
-researcher: ${RESEARCHER}
-git_commit: ${GIT_COMMIT}
-branch: ${BRANCH}
-repository: ${REPO}
-EOF
-if [[ "$DIRTY" == true ]]; then
-    echo "dirty: true"
+printf '%s\n' '---'
+printf 'date: %s\n' "$(yaml_string "$DATE_ISO")"
+printf 'researcher: %s\n' "$(yaml_string "$RESEARCHER")"
+if [[ -n "$REPO_PATH" ]]; then
+    emit_repository_fields
 fi
-cat << EOF
-topic: "${TOPIC_ESCAPED}"
-tags: ${TAGS_YAML}
-status: ${STATUS}
-last_updated: ${DATE_ISO}
-last_updated_by: ${RESEARCHER}
----
-EOF
+printf 'topic: %s\n' "$(yaml_string "$TOPIC")"
+printf 'tags: %s\n' "$tags_yaml"
+printf 'status: %s\n' "$(yaml_string "$STATUS")"
+printf 'last_updated: %s\n' "$(yaml_string "$DATE_ISO")"
+printf 'last_updated_by: %s\n' "$(yaml_string "$RESEARCHER")"
+printf '%s\n' '---'
