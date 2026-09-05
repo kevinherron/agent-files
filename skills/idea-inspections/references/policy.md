@@ -19,7 +19,7 @@ as **blocked**, not hidden.
 ```
 .idea-inspections/
 ├── policy.yaml   # COMMITTED — the team's inspection policy
-└── cache.json    # GITIGNORED — inspection-scan cache (see SKILL.md "Reusing the scan")
+└── cache.json    # GITIGNORED — inspection-scan cache (see references/scan-reuse.md)
 ```
 
 Add `.idea-inspections/cache.json` to `.gitignore`; keep `policy.yaml` committed.

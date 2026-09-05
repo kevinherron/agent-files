@@ -41,7 +41,7 @@ export const meta = {
 // Be robust to `args` arriving as a JSON string. A large inline args payload can be passed (or
 // serialized) as a JSON-encoded string across the tool boundary; then `args.files`/`args.mode` are
 // undefined and the run silently degrades to "No files in scope" + mode "apply". Re-parse so the
-// inputs survive. (Prefer passing args as a real object; for big scopes see the wrapper in SKILL.md.)
+// inputs survive. (Prefer passing args as a real object; for big scopes see references/claude-workflow.md.)
 let input = args
 if (typeof input === 'string') {
   try {
