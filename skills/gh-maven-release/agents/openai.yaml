@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Maven Release"
+  short_description: "Safely run and recover Maven releases"
+  default_prompt: "Use $gh-maven-release to publish the next Maven release and monitor its GitHub Actions deployment."
