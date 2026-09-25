@@ -4,20 +4,37 @@ description: "Create or update a GitHub pull request for the requested changes."
 ---
 # Create PR
 
-PR titles should be concise and descriptive.
-A good PR title is human-readable and explains why the change matters.
+## Writing the description
 
-Open the description with a simple explanation of the modification, feature, or problem being solved, then briefly explain the approach.
-Do not lead with an implementation inventory.
-Do not include counts of files, tests added, or lines of code changed.
-Focus on the problem being solved and the approach taken.
+Write for an experienced engineer who has not followed the conversation. The description should explain the change without requiring the reviewer to reconstruct its purpose from the diff or linked issues.
 
-Tell the story in prose, not in headings.
-If the body uses section headings, keep them to a few plain structural labels, never sentences that carry the narrative or one heading per fix or finding.
+Lead with the problem or intended improvement. Explain:
 
-Write the body as flowing prose. GitHub soft-wraps Markdown, so do not hard-wrap paragraphs to a fixed column the way commit messages are wrapped.
+- What situation triggers the relevant behavior.
+- What happened before.
+- What happens after.
+- Why the change is needed.
 
-Include relevant verification actually performed and any material risks, limitations, rollout notes, or follow-up work. Never claim tests or checks that were not run or observed.
+Use concrete inputs, outputs, errors, or user actions when they make the difference easier to understand. Prefer plain terms; connect necessary technical terms to the behavior they describe.
+
+Distinguish behavior changes from added verification, refactoring, and already-existing behavior. For a test-only change, explain what was previously unverified and what the new tests establish. For a refactor, explain what responsibility or flow changes and why that helps.
+
+Do not lead with an implementation inventory or counts of files, tests added, or changed lines. Mention files and symbols when they help the reviewer locate or understand an important mechanism.
+
+Scale the explanation to the change. A small PR may need only one or two paragraphs. A larger PR may benefit from a before-and-after table and a few plain section headings. Do not force every PR into the same template.
+
+Use the smallest visual that makes the change clearer:
+
+- A before-and-after table for several distinct behavior changes.
+- A short diff for changed code shape or output.
+- Pseudocode for a rule or algorithm.
+- A small Mermaid diagram for control flow or component interaction.
+
+Place each visual beside its explanation. Keep examples faithful to the implementation and label simplified or illustrative snippets. Use formats that render directly in the PR description.
+
+Explain what verification establishes, including material limits, risks, and rollout considerations. Separate completed fixes from deferred work. Put detailed commands, versions, counts, and evidence links after the explanation of the change. Never claim tests or checks that were not run or observed.
+
+Keep titles concise and descriptive. Use flowing prose without hard-wrapped paragraphs. Headings should organize the explanation, not carry it.
 
 ## Gathering context
 
@@ -45,7 +62,7 @@ Prefer the `gh` CLI when it is available and authenticated for the repository ho
 
 3. Resolve the push remote from the branch upstream and repository remotes. Push the current `HEAD` so the hosted branch includes all local commits. Add `-u` only when the branch has no upstream. Do not assume the push remote is named `origin`. Stop on a rejected push, and never force-push unless the user explicitly authorizes it.
 
-4. Write the body to a temporary file outside the worktree, then create the PR with `--body-file` so formatting survives:
+4. Write the body to a temporary file outside the worktree. Before publishing, read the draft as someone unfamiliar with the task. Can they explain what changed and why, distinguish fixes from tests, and identify what remains unresolved? Replace vague claims with concrete examples before publishing. Then create the PR with `--body-file` so formatting survives:
 
    ```
    gh pr create --base <base> --title "<title>" --body-file <path>
@@ -53,6 +70,6 @@ Prefer the `gh` CLI when it is available and authenticated for the repository ho
 
    Add `--head <owner>:<branch>` when a fork or nonstandard remote requires it. Add `--draft` when the user requests a draft or the context clearly identifies unfinished work. Remove the temporary body file after the command completes.
 
-5. Read the PR back with `gh pr view --json url,title,baseRefName,headRefName,isDraft`. Verify the important fields, then report the resulting URL.
+5. Read the PR back with `gh pr view --json url,title,body,baseRefName,headRefName,isDraft`. Verify the published description as well as the PR metadata. Check that tables, code fences, diagrams, and links survived correctly, then report the resulting URL.
 
 If `gh` is unavailable or unauthenticated, use another already authenticated GitHub integration when one is available. Otherwise explain the limitation and offer to push the branch and provide the compare URL, or to use the GitHub API after authentication. Do not silently choose a materially different workflow.
