@@ -1,0 +1,4 @@
+interface:
+  display_name: "Milo issue"
+  short_description: "Analyze Milo issues and deliver reviewed fixes"
+  default_prompt: "Use $milo-issue to analyze and fix this Milo issue, choosing autonomous or proposals mode based on the tradeoffs."
